@@ -1,5 +1,4 @@
-require 'collectd/interface'
-require 'collectd/server'
+require 'collectd'
 
 Collectd::add_server 1
 
@@ -9,4 +8,6 @@ loop do
   Collectd.ruby_collectd(:test).cpu(:time).counter = c
   c += 1
   sleep 0.01
+  print '.'
+  STDOUT.flush
 end
