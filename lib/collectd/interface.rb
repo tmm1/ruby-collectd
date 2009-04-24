@@ -1,5 +1,6 @@
 require 'collectd/pkt'
 
+
 module Collectd
   class << self
 
