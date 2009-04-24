@@ -58,6 +58,11 @@ module Collectd
         server.set_counter(plugin_type, values)
       end
     end
+    def count!(*values)
+      Collectd.each_server do |server|
+        server.inc_counter(plugin_type, values)
+      end
+    end
     def plugin_type
       [@plugin, @plugin_instance, @type, @type_instance]
     end
@@ -73,6 +78,13 @@ module Collectd
       @gauges = {}
     end
     def set_counter(plugin_type, values)
+      @counters[plugin_type] = values
+    end
+    def inc_counter(plugin_type, values)
+      old_values = @counters[plugin_type] || []
+      values.map! { |value|
+        value + (old_values.shift || 0)
+      }
       @counters[plugin_type] = values
     end
     def set_gauge(plugin_type, values)
@@ -124,8 +136,7 @@ module Collectd
         end
       end
 
-      # Reset...
-      @counters = {}
+      # Reset only gauges. Counters are persistent for incrementing.
       @gauges = {}
 
       # And return serialized packet of parts
