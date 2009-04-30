@@ -9,6 +9,7 @@ module Collectd
       @sock.connect(host, port)
 
       EM.add_periodic_timer(interval) do
+        Collectd.run_pollables_for self
         Thread.critical = true
         pkt = make_pkt
         Thread.critical = false

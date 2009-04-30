@@ -13,6 +13,7 @@ module Collectd
         loop do
           sleep interval
 
+          Collectd.run_pollables_for self
           Thread.critical = true
           pkt = make_pkt
           Thread.critical = false

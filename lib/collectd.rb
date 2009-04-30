@@ -1,3 +1,4 @@
+require 'collectd/proc_stats'
 require 'collectd/interface'
 require 'collectd/server'
 begin

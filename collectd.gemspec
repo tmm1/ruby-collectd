@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.email = %q{stephan@spaceboyz.net}
   s.files = %w(
 lib/collectd/interface.rb
+lib/collectd/proc_stats.rb
 lib/collectd/pkt.rb
 lib/collectd/server.rb
 lib/collectd/em_server.rb

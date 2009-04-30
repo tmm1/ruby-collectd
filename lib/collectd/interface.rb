@@ -22,6 +22,17 @@ module Collectd
       @@servers.each(&block)
     end
 
+    def add_pollable(&block)
+      @@pollables ||= []
+      @@pollables << block
+    end
+    def run_pollables_for(server)
+      @@pollables ||= []
+      @@pollables.each do |block|
+        block.call(server)
+      end
+    end
+
     def method_missing(plugin, plugin_instance)
       Plugin.new(plugin, plugin_instance)
     end
@@ -31,6 +42,7 @@ module Collectd
   ##
   # Interface helper
   class Plugin
+    include ProcStats
     def initialize(plugin, plugin_instance)
       @plugin, @plugin_instance = plugin, plugin_instance
     end
@@ -46,12 +58,16 @@ module Collectd
       @plugin, @plugin_instance = plugin, plugin_instance
       @type, @type_instance = type, type_instance
     end
+    ##
+    # GAUGE
     def gauge=(values)
       values = [values] unless values.kind_of? Array
       Collectd.each_server do |server|
         server.set_gauge(plugin_type, values)
       end
     end
+    ##
+    # COUNTER
     def counter=(values)
       values = [values] unless values.kind_of? Array
       Collectd.each_server do |server|
@@ -63,6 +79,30 @@ module Collectd
         server.inc_counter(plugin_type, values)
       end
     end
+    def polled_gauge(&block)
+      Collectd.add_pollable do |server|
+        values = block.call
+        values = [values] unless values.kind_of? Array
+        server.set_gauge(plugin_type, values) if values
+      end
+    end
+    def polled_count(&block)
+      Collectd.add_pollable do |server|
+        values = block.call
+        values = [values] unless values.kind_of? Array
+        server.inc_counter(plugin_type, values) if values
+      end
+    end
+    def polled_counter(&block)
+      Collectd.add_pollable do |server|
+        values = block.call
+        values = [values] unless values.kind_of? Array
+        server.set_counter(plugin_type, values) if values
+      end
+    end
+    private
+    ##
+    # [plugin, plugin_instance, type, type_instance]
     def plugin_type
       [@plugin, @plugin_instance, @type, @type_instance]
     end
