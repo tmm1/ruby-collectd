@@ -2,10 +2,10 @@
  
 Gem::Specification.new do |s|
   s.name = %q{collectd}
-  s.version = "0.0.4"
+  s.version = "0.0.5"
  
   s.authors = ["Stephan Maka"]
-  s.date = %q{2009-04-25}
+  s.date = %q{2009-05-01}
   s.email = %q{stephan@spaceboyz.net}
   s.files = %w(
 lib/collectd/interface.rb
