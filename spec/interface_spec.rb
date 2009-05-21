@@ -108,3 +108,44 @@ describe Collectd::ProcStats do
     end
   end
 end
+
+describe Collectd::EmPlugin do
+  before(:each) do
+    Collectd.reset!
+    @server = StubServer.new
+    Collectd << @server
+    @df = EM::DefaultDeferrable.new
+    Collectd.plugin1(:plugin_instance1).track_deferrable('df', @df)
+  end
+
+  context 'when succeeding' do
+    it 'should callback' do
+      @df.succeed
+    end
+    it 'should report latency' do
+      @df.succeed
+      g = @server.gauges[[:plugin1, :plugin_instance1, :latency, 'df success']]
+      g[0].should be_kind_of(Numeric)
+    end
+    it 'should increase a counter' do
+      @df.succeed
+      c = @server.counters[[:plugin1, :plugin_instance1, :counter, 'df success']]
+      c[0].should be_kind_of(Numeric)
+    end
+  end
+  context 'when failing' do
+    it 'should callback' do
+      @df.fail
+    end
+    it 'should report latency' do
+      @df.fail
+      g = @server.gauges[[:plugin1, :plugin_instance1, :latency, 'df error']]
+      g[0].should be_kind_of(Numeric)
+    end
+    it 'should increase a counter' do
+      @df.fail
+      c = @server.counters[[:plugin1, :plugin_instance1, :counter, 'df error']]
+      c[0].should be_kind_of(Numeric)
+    end
+  end
+end

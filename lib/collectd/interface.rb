@@ -1,4 +1,5 @@
 require 'collectd/pkt'
+require 'collectd/em_support'
 
 
 module Collectd
@@ -55,6 +56,7 @@ module Collectd
   # Interface helper
   class Plugin
     include ProcStats
+    include EmPlugin
     def initialize(plugin, plugin_instance)
       @plugin, @plugin_instance = plugin, plugin_instance
     end
