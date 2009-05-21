@@ -82,22 +82,28 @@ module Collectd
     def polled_gauge(&block)
       Collectd.add_pollable do |server|
         values = block.call
-        values = [values] unless values.kind_of? Array
-        server.set_gauge(plugin_type, values) if values
+        if values
+          values = [values] unless values.kind_of? Array
+          server.set_gauge(plugin_type, values)
+        end
       end
     end
     def polled_count(&block)
       Collectd.add_pollable do |server|
         values = block.call
-        values = [values] unless values.kind_of? Array
-        server.inc_counter(plugin_type, values) if values
+        if values
+          values = [values] unless values.kind_of? Array
+          server.inc_counter(plugin_type, values)
+        end
       end
     end
     def polled_counter(&block)
       Collectd.add_pollable do |server|
         values = block.call
-        values = [values] unless values.kind_of? Array
-        server.set_counter(plugin_type, values) if values
+        if values
+          values = [values] unless values.kind_of? Array
+          server.set_counter(plugin_type, values)
+        end
       end
     end
     private
