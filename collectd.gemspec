@@ -2,7 +2,7 @@
  
 Gem::Specification.new do |s|
   s.name = %q{collectd}
-  s.version = "0.0.5"
+  s.version = "0.0.6"
  
   s.authors = ["Stephan Maka"]
   s.date = %q{2009-05-01}
