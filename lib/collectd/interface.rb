@@ -18,6 +18,18 @@ module Collectd
       @@servers << Server.new(interval, addr, port)
     end
 
+    def <<(server)
+      @@servers << server
+    end
+
+    def reset!
+      @@servers.each do |server|
+        server.close if server.respond_to?(:close)
+      end
+      @@servers = []
+      @@pollables = []
+    end
+
     def each_server(&block)
       @@servers.each(&block)
     end
