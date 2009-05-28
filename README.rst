@@ -1,27 +1,23 @@
 collectd Data Model
 -------------------
 
-Collectd groups data by *six categories:* hostname, plugin,
-plugin-instance, type, type-instance, values
+Collectd groups data by **six categories:**
 
 * *hostname* is grabbed from `hostname -f`
-* *plugin* is a constant defined in Stats on the programs' side
-  (application name)
+* *plugin* is the application's name
 * *plugin-instance* is passed from the programs' side with the
   programs instance identifier, useful if you're running the same
   script twice (PIDs are quite too random)
 * *type* is the kind of data you are measuring and must be defined in
-  [types.db](http://collectd.org/documentation/manpages/types.db.5.shtml)
-  for collectd to understand
+  types.db_ for collectd to understand
 * *type-instance* provides further distinction and have no relation to
   other type-instances. Multiple type-instances are only rendered into
   one graph by collection3 if defined with module GenericStacked.
 * *values* are one or more field names and types belonging
   together. The exact amount of fields and their corresponding names
-  (useful to collection3) are specified in collectd's
-  [types.db](http://collectd.org/documentation/manpages/types.db.5.shtml).
+  (useful to collection3) are specified in collectd's types.db_.
 
-A value can be either of *two types:*
+A value can be either of **two types:**
 
 * *COUNTER* is for increasing counters where you want to plot the
   delta. Network interface traffic counters are a good example.
@@ -32,10 +28,14 @@ A value can be either of *two types:*
 Usage
 -----
 
+.. sourcecode:: ruby
+
     gem 'astro-collectd'
     require 'collectd'
 
 First of all, specify a server to send data to:
+
+.. sourcecode:: ruby
 
     Collectd.add_server(interval, addr='ff18::efc0:4a42', port=25826)
 
@@ -45,26 +45,38 @@ in collectd, an interval of 1 seconds shouldn't hurt either.
 All the identifiers from above can be given free form with some
 method_missing stuff. Like this:
 
+.. sourcecode:: ruby
+
     # Set gauge absolutely
     Collectd.plugin(:plugin_instance).type(:type_instance).gauge = 23
+    
     # Increase counter relatively (collectd caches counters)
     Collectd.plugin(:plugin_instance).type(:type_instance).count! 5
+    
     # Set counter absolutely
     Collectd.plugin(:plugin_instance).type(:type_instance).counter = 42
 
 For convenience, define yourself a global *shortcut*, like:
+
+.. sourcecode:: ruby
 
     Stats = Collectd.my_zombie(RAILS_ENV)
 
 To automatically collect *memory and CPU statistics* of your Ruby
 process, do:
 
+.. sourcecode:: ruby
+
     Stats.with_full_proc_stats
 
 You can also have the library *poll* for your data, if you feel
 comfortable with that, eg:
 
+.. sourcecode:: ruby
+
     Stats.counter(:seconds_elapsed).polled_counter do
       Time.now.to_i
     end
 
+
+.. _types.db: http://collectd.org/documentation/manpages/types.db.5.shtml
