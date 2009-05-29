@@ -20,10 +20,10 @@ module Collectd
 
     def with_polled_memory
       memory('VmRSS').polled_gauge do
-        v = process_status('VmRSS') ? v.to_i * 1024 : nil
+        (v = process_status('VmRSS')) ? v.to_i * 1024 : nil
       end
       memory('VmSize').polled_gauge do
-        v = process_status('VmSize') ? v.to_i * 1024 : nil
+        (v = process_status('VmSize')) ? v.to_i * 1024 : nil
       end
 
       self
