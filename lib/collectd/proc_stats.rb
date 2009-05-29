@@ -5,20 +5,25 @@ module Collectd
     def with_polled_memory
       def process_status(field)
         fields = {}
-        IO.readlines("/proc/#{$$}/status").each { |line|
-          line.strip!
-          if line =~ /^(.+?):\s+(.+)$/
-            fields[$1] = $2
-          end
-        }
-        fields[field]
+        begin
+          IO.readlines("/proc/#{$$}/status").each { |line|
+            line.strip!
+            if line =~ /^(.+?):\s+(.+)$/
+              fields[$1] = $2
+            end
+          }
+        rescue Errno::ENOENT
+          nil
+        else
+          fields[field]
+        end
       end
 
       memory('VmRSS').polled_gauge do
-        process_status('VmRSS').to_i * 1024
+        v = process_status('VmRSS') ? v.to_i * 1024 : nil
       end
       memory('VmSize').polled_gauge do
-        process_status('VmSize').to_i * 1024
+        v = process_status('VmSize') ? v.to_i * 1024 : nil
       end
 
       self
