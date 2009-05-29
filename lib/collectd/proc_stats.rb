@@ -2,23 +2,23 @@ module Collectd
   ##
   # Included by Interface
   module ProcStats
-    def with_polled_memory
-      def process_status(field)
-        fields = {}
-        begin
-          IO.readlines("/proc/#{$$}/status").each { |line|
-            line.strip!
-            if line =~ /^(.+?):\s+(.+)$/
-              fields[$1] = $2
-            end
-          }
-        rescue Errno::ENOENT
-          nil
-        else
-          fields[field]
-        end
+    def process_status(field)
+      fields = {}
+      begin
+        IO.readlines("/proc/#{$$}/status").each { |line|
+          line.strip!
+          if line =~ /^(.+?):\s+(.+)$/
+            fields[$1] = $2
+          end
+        }
+      rescue Errno::ENOENT
+        nil
+      else
+        fields[field]
       end
+    end
 
+    def with_polled_memory
       memory('VmRSS').polled_gauge do
         v = process_status('VmRSS') ? v.to_i * 1024 : nil
       end
