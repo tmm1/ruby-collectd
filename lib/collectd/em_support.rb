@@ -7,10 +7,10 @@ module Collectd
     def track_deferrable(name, deferrable)
       attach_time = Time.now
       deferrable.callback do |*a|
-        push_deferrable_values("#{name} success", attach_time)
+        push_deferrable_values("#{name}_success", attach_time)
       end
       deferrable.errback do |*a|
-        push_deferrable_values("#{name} error", attach_time)
+        push_deferrable_values("#{name}_error", attach_time)
       end
     end
     def push_deferrable_values(name, attach_time)
