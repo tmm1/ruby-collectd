@@ -92,19 +92,13 @@ describe Collectd::ProcStats do
     end
   end
   context 'when polling cpu' do
-    if File.exist?("/proc/#{$$}/schedstat")
-      it 'should report user time' do
-        c = @server.counters[[:plugin1, :plugin_instance1, :cpu, "user"]]
-        c[0].should be_kind_of(Fixnum)
-      end
-      it 'should report wait time' do
-        c = @server.counters[[:plugin1, :plugin_instance1, :cpu, "wait"]]
-        c[0].should be_kind_of(Fixnum)
-      end
-    else
-      it 'when not available here' do
-        pending('not available here')
-      end
+    it 'should report user time' do
+      c = @server.counters[[:plugin1, :plugin_instance1, :cpu, "user"]]
+      c[0].should be_kind_of(Fixnum)
+    end
+    it 'should report system time' do
+      c = @server.counters[[:plugin1, :plugin_instance1, :cpu, "sys"]]
+      c[0].should be_kind_of(Fixnum)
     end
   end
 end
