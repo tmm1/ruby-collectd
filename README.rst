@@ -28,24 +28,25 @@ A value can be either of **two types:**
 Usage
 -----
 
-.. sourcecode:: ruby
+::
 
     gem 'astro-collectd'
     require 'collectd'
 
 First of all, specify a server to send data to:
 
-.. sourcecode:: ruby
+::
 
     Collectd.add_server(interval, addr='ff18::efc0:4a42', port=25826)
 
-interval of 10 is quite reasonable. Because of UDP and some buffering
-in collectd, an interval of 1 seconds shouldn't hurt either.
+Each server definition you add will receive all the data you push to
+later. An interval of 10 is quite reasonable. Because of UDP and some
+buffering in collectd, an interval of 1 seconds shouldn't hurt either.
 
 All the identifiers from above can be given free form with some
 method_missing stuff. Like this:
 
-.. sourcecode:: ruby
+::
 
     # Set gauge absolutely
     Collectd.plugin(:plugin_instance).type(:type_instance).gauge = 23
@@ -58,21 +59,21 @@ method_missing stuff. Like this:
 
 For convenience, define yourself a global *shortcut*, like:
 
-.. sourcecode:: ruby
+::
 
     Stats = Collectd.my_zombie(RAILS_ENV)
 
 To automatically collect *memory and CPU statistics* of your Ruby
 process, do:
 
-.. sourcecode:: ruby
+::
 
     Stats.with_full_proc_stats
 
 You can also have the library *poll* for your data, if you feel
 comfortable with that, eg:
 
-.. sourcecode:: ruby
+::
 
     Stats.counter(:seconds_elapsed).polled_counter do
       Time.now.to_i
