@@ -97,7 +97,7 @@ describe Collectd::ProcStats do
       c[0].should be_kind_of(Fixnum)
     end
     it 'should report system time' do
-      c = @server.counters[[:plugin1, :plugin_instance1, :cpu, "sys"]]
+      c = @server.counters[[:plugin1, :plugin_instance1, :cpu, "system"]]
       c[0].should be_kind_of(Fixnum)
     end
   end
