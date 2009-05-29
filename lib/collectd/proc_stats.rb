@@ -25,19 +25,11 @@ module Collectd
     end
 
     def with_polled_cpu
-      def schedstats
-        if IO.readlines("/proc/#{$$}/schedstat").to_s =~ /^(\d+) (\d+) (\d+)/
-            [$1.to_i, $2.to_i, $3.to_i]
-        else
-          []
-        end
-      end
-
       cpu('user').polled_counter do
-        schedstats[0]
+        (Process::times.utime * 100).to_i
       end
-      cpu('wait').polled_counter do
-        schedstats[1]
+      cpu('sys').polled_counter do
+        (Process::times.stime * 100).to_i
       end
     end
 
