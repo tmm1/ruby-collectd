@@ -33,7 +33,7 @@ module Collectd
       cpu('user').polled_counter do
         (Process::times.utime * 100).to_i
       end
-      cpu('sys').polled_counter do
+      cpu('system').polled_counter do
         (Process::times.stime * 100).to_i
       end
     end
