@@ -8,8 +8,12 @@ module Collectd
 
       ##
       # Makes subclasses more declarative
-      def self.type(number)
-        define_method(:type) { number }
+      def self.type(number=nil)
+        number ? @type = number : @type
+      end
+
+      def type
+        self.class.type
       end
     end
 
