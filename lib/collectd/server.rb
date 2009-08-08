@@ -6,7 +6,7 @@ module Collectd
 
     def initialize(interval, host, port)
       super(interval)
-      @sock = UDPSocket.new(Socket::AF_INET6)
+      @sock = UDPSocket.new(host.index(':') ? Socket::AF_INET6 : Socket::AF_INET)
       @sock.connect(host, port)
 
       Thread.new do
