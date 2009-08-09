@@ -41,6 +41,9 @@ module Collectd
 
     class Time < Number
       type 1
+      def initialize(t = Time.now.to_i)
+        super
+      end
     end
 
     class Plugin < String

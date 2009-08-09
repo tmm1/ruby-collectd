@@ -188,8 +188,8 @@ module Collectd
         end
 
         pkt = [Packet::Host.new(Collectd.hostname),
-               Packet::Time.new(Time.now.to_i),
-               Packet::Interval.new(10)]
+               Packet::Time.new,
+               Packet::Interval.new(@interval)]
 
         @plugin_type_values.each do |plugin,plugin_instances|
           pkt << Packet::Plugin.new(plugin)
