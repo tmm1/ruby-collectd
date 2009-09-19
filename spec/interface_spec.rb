@@ -118,12 +118,12 @@ describe Collectd::EmPlugin do
     end
     it 'should report latency' do
       @df.succeed
-      g = @server.gauges[[:plugin1, :plugin_instance1, :latency, 'df success']]
+      g = @server.gauges[[:plugin1, :plugin_instance1, :latency, 'df_success']]
       g[0].should be_kind_of(Numeric)
     end
     it 'should increase a counter' do
       @df.succeed
-      c = @server.counters[[:plugin1, :plugin_instance1, :counter, 'df success']]
+      c = @server.counters[[:plugin1, :plugin_instance1, :counter, 'df_success']]
       c[0].should be_kind_of(Numeric)
     end
   end
@@ -133,12 +133,12 @@ describe Collectd::EmPlugin do
     end
     it 'should report latency' do
       @df.fail
-      g = @server.gauges[[:plugin1, :plugin_instance1, :latency, 'df error']]
+      g = @server.gauges[[:plugin1, :plugin_instance1, :latency, 'df_error']]
       g[0].should be_kind_of(Numeric)
     end
     it 'should increase a counter' do
       @df.fail
-      c = @server.counters[[:plugin1, :plugin_instance1, :counter, 'df error']]
+      c = @server.counters[[:plugin1, :plugin_instance1, :counter, 'df_error']]
       c[0].should be_kind_of(Numeric)
     end
   end
