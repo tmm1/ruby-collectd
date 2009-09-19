@@ -151,7 +151,7 @@ module Collectd
       # Use count & sums for average
       if @gauges.has_key?(plugin_type)
         old_values = @gauges[plugin_type]
-        count = old_values.shift
+        count = old_values.shift || 0
         values.map! { |value| value + (old_values.shift || value) }
         @gauges[plugin_type] = [count + 1] + values
       else
@@ -174,10 +174,10 @@ module Collectd
         plugin_type_values[plugin] ||= {}
         plugin_type_values[plugin][plugin_instance] ||= {}
         plugin_type_values[plugin][plugin_instance][type] ||= {}
-        count = values.shift
+        count = values.shift || next
         values.map! { |value| value.to_f / count }
         plugin_type_values[plugin][plugin_instance][type][type_instance] =
-        Packet::Values.new(values.map { |value| Packet::Values::Gauge.new(value) })
+          Packet::Values.new(values.map { |value| Packet::Values::Gauge.new(value) })
       end
       pkt = [Packet::Host.new(Collectd.hostname),
              Packet::Time.new(Time.now.to_i),
