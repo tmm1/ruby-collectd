@@ -11,11 +11,7 @@ Gem::Specification.new do |s|
   s.authors = ["Stephan Maka"]
   s.date = %q{2009-09-19}
   s.email = %q{astro@spaceboyz.net}
-  s.extra_rdoc_files = [
-    "README.rst"
-  ]
   s.files = [
-    "README.rst",
      "Rakefile",
      "VERSION.yml",
      "examples/em_sender.rb",
