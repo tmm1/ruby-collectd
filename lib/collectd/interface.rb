@@ -16,7 +16,11 @@ module Collectd
     @@servers = []
 
     def add_server(interval, addr='ff18::efc0:4a42', port=25826)
-      @@servers << Server.new(interval, addr, port)
+      if defined?(EM) && EM.running?
+        @@servers << EmServer.new
+      else
+        @@servers << Server.new(interval, addr, port)
+      end
     end
 
     def <<(server)
