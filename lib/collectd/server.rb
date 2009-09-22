@@ -17,7 +17,10 @@ module Collectd
           Thread.critical = true
           pkt = make_pkt
           Thread.critical = false
-          @sock.send(pkt, 0)
+          begin
+            @sock.send(pkt, 0)
+          rescue SystemCallError
+          end
         end
       end.abort_on_exception = true
     end
