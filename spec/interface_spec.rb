@@ -3,9 +3,11 @@ require 'collectd'
 
 describe Collectd do
   before(:each) do
-    Collectd.reset!
     @server = mock('Server')
     Collectd << @server
+  end
+  after(:each) do
+    Collectd.reset!
   end
 
   it 'should set_counter' do
@@ -74,11 +76,13 @@ end
 
 describe Collectd::ProcStats do
   before(:each) do
-    Collectd.reset!
     @server = StubServer.new
     Collectd << @server
     Collectd.plugin1(:plugin_instance1).with_full_proc_stats
     Collectd.run_pollables_for @server
+  end
+  after(:each) do
+    Collectd.reset!
   end
 
   context 'when polling memory' do
@@ -105,11 +109,13 @@ end
 
 describe Collectd::EmPlugin do
   before(:each) do
-    Collectd.reset!
     @server = StubServer.new
     Collectd << @server
     @df = EM::DefaultDeferrable.new
     Collectd.plugin1(:plugin_instance1).track_deferrable('df', @df)
+  end
+  after(:each) do
+    Collectd.reset!
   end
 
   context 'when succeeding' do
@@ -143,3 +149,49 @@ describe Collectd::EmPlugin do
     end
   end
 end
+
+describe Collectd::Server do
+  before :all do
+    Collectd.add_server(0.1)
+  end
+  after :all do
+    Collectd.reset!
+  end
+
+  it "should spawn a Collectd::Server" do
+    servers = []
+    Collectd.each_server { |s| servers << s }
+    servers.length.should == 1
+    servers[0].should be_kind_of(Collectd::Server)
+  end
+
+  it "should run for 2 seconds" do
+    sleep 2
+  end
+end
+
+describe Collectd::EmServer do
+  it "should spawn a Collectd::Server" do
+    EM.run {
+      Collectd.add_server 0.1
+      EM.next_tick {
+        EM.stop
+        servers = []
+        Collectd.each_server { |s| servers << s }
+        servers.length.should == 1
+        servers[0].should be_kind_of(Collectd::EmServer)
+        Collectd.reset!
+      }
+    }
+  end
+
+  it "should run for 2 seconds" do
+    EM.run {
+      Collectd.add_server 0.1
+      EM::Timer.new(2) {
+        EM.stop
+        Collectd.reset!
+      }
+    }
+  end
+end if defined?(EM)
