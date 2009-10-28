@@ -31,8 +31,11 @@ RubyGems, then install it:
 
 ::
    
-  gem sources -a http://gems.github.com
-  sudo gem install astro-collectd
+  gem sources -a http://gemcutter.org
+  gem install collectd
+
+Add ``sudo`` in front of the ``gem install`` command if you want it to be 
+installed system wide. 
 
 
 Usage
