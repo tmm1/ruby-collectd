@@ -26,8 +26,8 @@ port `25826` (so it's acting as a server):
   </Plugin>
 
 
-To install the gem, make sure GitHub's RubyGems server is known to your local 
-RubyGems, then install it:
+To install the gem, make sure the Gemcutter RubyGems server is known to your 
+local RubyGems, then install it:
 
 ::
    
