@@ -14,9 +14,7 @@ module Collectd
           sleep interval
 
           Collectd.run_pollables_for self
-          Thread.critical = true
           pkt = make_pkt
-          Thread.critical = false
           begin
             @sock.send(pkt, 0)
           rescue SystemCallError

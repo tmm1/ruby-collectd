@@ -140,71 +140,81 @@ module Collectd
       @interval = interval
       @counters = {}
       @gauges = {}
+      @lock = Mutex.new
     end
     def set_counter(plugin_type, values)
-      @counters[plugin_type] = values
+      @lock.synchronize do
+        @counters[plugin_type] = values
+      end
     end
     def inc_counter(plugin_type, values)
-      old_values = @counters[plugin_type] || []
-      values.map! { |value|
-        value + (old_values.shift || 0)
-      }
-      @counters[plugin_type] = values
+      @lock.synchronize do
+        old_values = @counters[plugin_type] || []
+        values.map! { |value|
+          value + (old_values.shift || 0)
+        }
+        @counters[plugin_type] = values
+      end
     end
     def set_gauge(plugin_type, values)
-      # Use count & sums for average
-      if @gauges.has_key?(plugin_type)
-        old_values = @gauges[plugin_type]
-        count = old_values.shift || 0
-        values.map! { |value| value + (old_values.shift || value) }
-        @gauges[plugin_type] = [count + 1] + values
-      else
-        @gauges[plugin_type] = [1] + values
+      @lock.synchronize do
+        # Use count & sums for average
+        if @gauges.has_key?(plugin_type)
+          old_values = @gauges[plugin_type]
+          count = old_values.shift || 0
+          values.map! { |value| value + (old_values.shift || value) }
+          @gauges[plugin_type] = [count + 1] + values
+        else
+          @gauges[plugin_type] = [1] + values
+        end
       end
     end
 
     def make_pkt
-      plugin_type_values = {}
-      @counters.each do |plugin_types,values|
-        plugin, plugin_instance, type, type_instance = plugin_types
-        plugin_type_values[plugin] ||= {}
-        plugin_type_values[plugin][plugin_instance] ||= {}
-        plugin_type_values[plugin][plugin_instance][type] ||= {}
-        plugin_type_values[plugin][plugin_instance][type][type_instance] =
-        Packet::Values.new(values.map { |value| Packet::Values::Counter.new(value) })
-      end
-      @gauges.each do |plugin_types,values|
-        plugin, plugin_instance, type, type_instance = plugin_types
-        plugin_type_values[plugin] ||= {}
-        plugin_type_values[plugin][plugin_instance] ||= {}
-        plugin_type_values[plugin][plugin_instance][type] ||= {}
-        count = values.shift || next
-        values.map! { |value| value.to_f / count }
-        plugin_type_values[plugin][plugin_instance][type][type_instance] =
-          Packet::Values.new(values.map { |value| Packet::Values::Gauge.new(value) })
-      end
-      pkt = [Packet::Host.new(Collectd.hostname),
-             Packet::Time.new(Time.now.to_i),
-             Packet::Interval.new(10)]
-      plugin_type_values.each do |plugin,plugin_instances|
-        pkt << Packet::Plugin.new(plugin)
-        plugin_instances.each do |plugin_instance,types|
-          pkt << Packet::PluginInstance.new(plugin_instance)
-          types.each do |type,type_instances|
-            pkt << Packet::Type.new(type)
-            type_instances.each do |type_instance,values|
-              pkt << Packet::TypeInstance.new(type_instance)
-              pkt << values
+      @lock.synchronize do
+        pkt = nil
+        plugin_type_values = {}
+        @counters.each do |plugin_types,values|
+          plugin, plugin_instance, type, type_instance = plugin_types
+          plugin_type_values[plugin] ||= {}
+          plugin_type_values[plugin][plugin_instance] ||= {}
+          plugin_type_values[plugin][plugin_instance][type] ||= {}
+          plugin_type_values[plugin][plugin_instance][type][type_instance] =
+            Packet::Values.new(values.map { |value| Packet::Values::Counter.new(value) })
+        end
+        @gauges.each do |plugin_types,values|
+          plugin, plugin_instance, type, type_instance = plugin_types
+          plugin_type_values[plugin] ||= {}
+          plugin_type_values[plugin][plugin_instance] ||= {}
+          plugin_type_values[plugin][plugin_instance][type] ||= {}
+          count = values.shift || next
+          values.map! { |value| value.to_f / count }
+          plugin_type_values[plugin][plugin_instance][type][type_instance] =
+            Packet::Values.new(values.map { |value| Packet::Values::Gauge.new(value) })
+        end
+        pkt = [Packet::Host.new(Collectd.hostname),
+               Packet::Time.new(Time.now.to_i),
+               Packet::Interval.new(10)]
+        plugin_type_values.each do |plugin,plugin_instances|
+          pkt << Packet::Plugin.new(plugin)
+          plugin_instances.each do |plugin_instance,types|
+            pkt << Packet::PluginInstance.new(plugin_instance)
+            types.each do |type,type_instances|
+              pkt << Packet::Type.new(type)
+              type_instances.each do |type_instance,values|
+                pkt << Packet::TypeInstance.new(type_instance)
+                pkt << values
+              end
             end
           end
         end
+
+        # Reset only gauges. Counters are persistent for incrementing.
+        @gauges = {}
+
+        # And return serialized packet of parts
+        pkt.to_s
       end
-
-      # Reset only gauges. Counters are persistent for incrementing.
-      @gauges = {}
-
-      # And return serialized packet of parts
-      pkt.to_s
     end
   end
 
