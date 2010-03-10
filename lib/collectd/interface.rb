@@ -173,29 +173,25 @@ module Collectd
     def make_pkt
       @lock.synchronize do
         pkt = nil
-        plugin_type_values = {}
+        @plugin_type_values = {}
+
         @counters.each do |plugin_types,values|
-          plugin, plugin_instance, type, type_instance = plugin_types
-          plugin_type_values[plugin] ||= {}
-          plugin_type_values[plugin][plugin_instance] ||= {}
-          plugin_type_values[plugin][plugin_instance][type] ||= {}
-          plugin_type_values[plugin][plugin_instance][type][type_instance] =
-            Packet::Values.new(values.map { |value| Packet::Values::Counter.new(value) })
+          packet_values = Packet::Values.new(values.map { |value| Packet::Values::Counter.new(value) })
+          populate_plugin_type_values(plugin_types, packet_values)
         end
+
         @gauges.each do |plugin_types,values|
-          plugin, plugin_instance, type, type_instance = plugin_types
-          plugin_type_values[plugin] ||= {}
-          plugin_type_values[plugin][plugin_instance] ||= {}
-          plugin_type_values[plugin][plugin_instance][type] ||= {}
           count = values.shift || next
           values.map! { |value| value.to_f / count }
-          plugin_type_values[plugin][plugin_instance][type][type_instance] =
-            Packet::Values.new(values.map { |value| Packet::Values::Gauge.new(value) })
+          packet_values = Packet::Values.new(values.map { |value| Packet::Values::Gauge.new(value) })
+          populate_plugin_type_values(plugin_types, packet_values)
         end
+
         pkt = [Packet::Host.new(Collectd.hostname),
                Packet::Time.new(Time.now.to_i),
                Packet::Interval.new(10)]
-        plugin_type_values.each do |plugin,plugin_instances|
+
+        @plugin_type_values.each do |plugin,plugin_instances|
           pkt << Packet::Plugin.new(plugin)
           plugin_instances.each do |plugin_instance,types|
             pkt << Packet::PluginInstance.new(plugin_instance)
@@ -216,6 +212,16 @@ module Collectd
         pkt.to_s
       end
     end
+
+    private
+    def populate_plugin_type_values(plugin_types, packet_values)
+      plugin, plugin_instance, type, type_instance = plugin_types
+      @plugin_type_values[plugin] ||= {}
+      @plugin_type_values[plugin][plugin_instance] ||= {}
+      @plugin_type_values[plugin][plugin_instance][type] ||= {}
+      @plugin_type_values[plugin][plugin_instance][type][type_instance] = packet_values
+    end
+
   end
 
 end
